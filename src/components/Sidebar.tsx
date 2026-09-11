@@ -6,13 +6,19 @@ interface SidebarProps {
 }
 
 const menuItems = [
-  { id: 'dashboard' as ActivePage, label: 'داشبورد', icon: 'fa-chart-line' },
-  { id: 'contracts' as ActivePage, label: 'قراردادها', icon: 'fa-file-contract' },
-  { id: 'crm' as ActivePage, label: 'مدیریت مشتریان', icon: 'fa-users' },
-  { id: 'commissions' as ActivePage, label: 'کمیسیون‌ها', icon: 'fa-calculator' },
+  { id: 'dashboard' as ActivePage, label: 'داشبورد', icon: 'fa-chart-line', section: 'main' },
+  { id: 'properties' as ActivePage, label: 'املاک', icon: 'fa-building', section: 'main' },
+  { id: 'contracts' as ActivePage, label: 'قراردادها', icon: 'fa-file-contract', section: 'main' },
+  { id: 'crm' as ActivePage, label: 'مشتریان (CRM)', icon: 'fa-users', section: 'main' },
+  { id: 'commissions' as ActivePage, label: 'کمیسیون‌ها', icon: 'fa-calculator', section: 'main' },
+  { id: 'calendar' as ActivePage, label: 'تقویم', icon: 'fa-calendar-days', section: 'tools' },
+  { id: 'reports' as ActivePage, label: 'گزارش‌ها', icon: 'fa-chart-pie', section: 'tools' },
 ];
 
 export default function Sidebar({ activePage, onNavigate }: SidebarProps) {
+  const mainItems = menuItems.filter(i => i.section === 'main');
+  const toolItems = menuItems.filter(i => i.section === 'tools');
+
   return (
     <div className="w-72 h-full bg-white border-l border-gray-100 flex flex-col shadow-sm">
       {/* Logo */}
@@ -29,9 +35,23 @@ export default function Sidebar({ activePage, onNavigate }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-1">
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         <p className="text-xs font-medium text-gray-400 px-4 mb-3">منوی اصلی</p>
-        {menuItems.map((item) => (
+        {mainItems.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => onNavigate(item.id)}
+            className={`sidebar-item w-full ${
+              activePage === item.id ? 'sidebar-item-active' : 'sidebar-item-inactive'
+            }`}
+          >
+            <i className={`fa-solid ${item.icon} w-5 text-center`}></i>
+            <span>{item.label}</span>
+          </button>
+        ))}
+
+        <p className="text-xs font-medium text-gray-400 px-4 mb-3 mt-6">ابزارها</p>
+        {toolItems.map((item) => (
           <button
             key={item.id}
             onClick={() => onNavigate(item.id)}
@@ -61,8 +81,8 @@ export default function Sidebar({ activePage, onNavigate }: SidebarProps) {
         
         {/* User */}
         <div className="flex items-center gap-3 mt-4 px-2">
-          <div className="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center">
-            <i className="fa-solid fa-user text-gray-500 text-sm"></i>
+          <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+            م
           </div>
           <div className="flex-1">
             <p className="text-sm font-medium text-gray-800">محمد احمدی</p>

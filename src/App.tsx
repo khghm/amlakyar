@@ -1,14 +1,18 @@
 import { useState } from 'react';
+import { DataProvider } from './store/DataContext';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import Contracts from './components/Contracts';
 import CRM from './components/CRM';
 import Commissions from './components/Commissions';
+import Properties from './components/Properties';
+import Calendar from './components/Calendar';
+import Reports from './components/Reports';
 import Header from './components/Header';
 
-export type ActivePage = 'dashboard' | 'contracts' | 'crm' | 'commissions';
+export type ActivePage = 'dashboard' | 'properties' | 'contracts' | 'crm' | 'commissions' | 'calendar' | 'reports';
 
-function App() {
+function AppContent() {
   const [activePage, setActivePage] = useState<ActivePage>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -16,12 +20,18 @@ function App() {
     switch (activePage) {
       case 'dashboard':
         return <Dashboard onNavigate={setActivePage} />;
+      case 'properties':
+        return <Properties />;
       case 'contracts':
         return <Contracts />;
       case 'crm':
         return <CRM />;
       case 'commissions':
         return <Commissions />;
+      case 'calendar':
+        return <Calendar />;
+      case 'reports':
+        return <Reports />;
       default:
         return <Dashboard onNavigate={setActivePage} />;
     }
@@ -43,7 +53,7 @@ function App() {
       }`}>
         <Sidebar 
           activePage={activePage} 
-          onNavigate={(page) => {
+          onNavigate={(page: ActivePage) => {
             setActivePage(page);
             setSidebarOpen(false);
           }} 
@@ -58,6 +68,14 @@ function App() {
         </main>
       </div>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <DataProvider>
+      <AppContent />
+    </DataProvider>
   );
 }
 
