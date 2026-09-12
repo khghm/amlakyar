@@ -1,14 +1,31 @@
 export const formatPrice = (price: number): string => {
   if (price >= 1_000_000_000) {
-    return `${(price / 1_000_000_000).toFixed(1).replace(/\.0$/, '')} میلیارد`;
+    const billions = price / 1_000_000_000;
+    const formatted = billions % 1 === 0 ? billions.toFixed(0) : billions.toFixed(1);
+    return `${toPersianDigits(formatted)} میلیارد`;
   }
   if (price >= 1_000_000) {
-    return `${(price / 1_000_000).toFixed(0)} میلیون`;
+    return `${toPersianDigits((price / 1_000_000).toFixed(0))} میلیون`;
   }
   if (price >= 1_000) {
-    return `${(price / 1_000).toFixed(0)} هزار`;
+    return `${toPersianDigits((price / 1_000).toFixed(0))} هزار`;
   }
-  return price.toLocaleString('fa-IR');
+  return toPersianDigits(price.toLocaleString('en-US'));
+};
+
+// Format number with Persian thousands separator
+export const formatCurrency = (value: number | string): string => {
+  const num = typeof value === 'string' ? parseInt(value.replace(/,/g, '')) : value;
+  if (isNaN(num)) return '';
+  return toPersianDigits(num.toLocaleString('en-US'));
+};
+
+// Parse currency input (remove separators and convert Persian digits)
+export const parseCurrencyInput = (value: string): number => {
+  const cleaned = value
+    .replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
+    .replace(/[,،\s]/g, '');
+  return parseInt(cleaned) || 0;
 };
 
 export const formatNumber = (num: number): string => {

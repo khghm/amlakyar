@@ -386,7 +386,83 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const addAgreement = (a: Omit<Agreement, 'id' | 'createdAt'>) => {
     const newAgreement = { ...a, id: generateId('AGR'), createdAt: new Date().toLocaleDateString('fa-IR') };
     setAgreements(prev => [...prev, newAgreement]);
-    addNotification({ title: 'قولنامه جدید ثبت شد', text: `قولنامه ${newAgreement.agreementNumber} با کد رهگیری ${newAgreement.trackingCode} ثبت شد`, type: 'success' });
+    
+    // Create related contract automatically
+    const contractType = a.type === 'صلح' ? 'مشارکت' : a.type;
+    const newContract: Omit<Contract, 'id' | 'createdAt'> = {
+      type: contractType as Contract['type'],
+      propertyId: '',
+      propertyTitle: `${a.property.type} - ${a.property.area} متر - ${a.property.address.slice(0, 30)}`,
+      clientId: '',
+      clientName: a.buyer.name,
+      clientPhone: a.buyer.phone,
+      clientNationalId: a.buyer.nationalId,
+      ownerName: a.seller.name,
+      ownerPhone: a.seller.phone,
+      amount: a.totalPrice,
+      deposit: a.deposit,
+      commissionRate: a.commissionRate,
+      commission: a.commissionAmount,
+      agentId: '',
+      agentName: '',
+      status: 'پیش‌نویس',
+      trackingCode: a.trackingCode,
+      govStatus: 'ارسال نشده',
+      notes: `ایجاد شده از قولنامه ${a.agreementNumber}`,
+    };
+    const contractId = `C-1402-${String(contracts.length + 90).padStart(3, '0')}`;
+    setContracts(prev => [...prev, { ...newContract, id: contractId, createdAt: new Date().toLocaleDateString('fa-IR') }]);
+
+    // Create calendar events for delivery and transfer
+    if (a.deliveryDate) {
+      setEvents(prev => [...prev, {
+        id: generateId('E'),
+        title: `تحویل ملک - ${a.property.type}`,
+        type: 'تسلیمر',
+        clientName: a.buyer.name,
+        clientId: '',
+        propertyTitle: `${a.property.type} - ${a.property.area} متر`,
+        propertyId: '',
+        date: a.deliveryDate,
+        time: '۱۰:۰۰',
+        duration: 60,
+        notes: `تحویل ملک طبق قولنامه ${a.agreementNumber}`,
+        status: 'برنامه‌ریزی شده',
+        color: 'red',
+      }]);
+    }
+    if (a.transferDate) {
+      setEvents(prev => [...prev, {
+        id: generateId('E'),
+        title: `تنظیم سند رسمی - ${a.notaryOffice}`,
+        type: 'امضا',
+        clientName: a.buyer.name,
+        clientId: '',
+        propertyTitle: `${a.property.type} - ${a.property.area} متر`,
+        propertyId: '',
+        date: a.transferDate,
+        time: '۰۹:۰۰',
+        duration: 120,
+        notes: `تنظیم سند در ${a.notaryOffice} طبق قولنامه ${a.agreementNumber}`,
+        status: 'برنامه‌ریزی شده',
+        color: 'green',
+      }]);
+    }
+
+    // Add activities to buyer client if exists
+    setClients(prev => prev.map(c => 
+      c.name === a.buyer.name ? {
+        ...c,
+        activities: [...c.activities, {
+          id: generateId('act'),
+          type: 'جلسه' as const,
+          text: `ثبت قولنامه ${a.agreementNumber} - ${a.type} ${a.property.type}`,
+          date: new Date().toLocaleDateString('fa-IR'),
+        }]
+      } : c
+    ));
+
+    addNotification({ title: 'قولنامه جدید ثبت شد', text: `قولنامه ${newAgreement.agreementNumber} با کد رهگیری ${newAgreement.trackingCode} ثبت شد. قرارداد و رویدادهای مرتبط ایجاد شدند.`, type: 'success' });
   };
   const updateAgreement = (id: string, a: Partial<Agreement>) => setAgreements(prev => prev.map(x => x.id === id ? { ...x, ...a } : x));
   const deleteAgreement = (id: string) => setAgreements(prev => prev.filter(x => x.id !== id));

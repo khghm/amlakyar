@@ -7,7 +7,7 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ onNavigate }: DashboardProps) {
-  const { properties, contracts, clients, events, notifications } = useData();
+  const { properties, contracts, clients, events, notifications, agreements } = useData();
 
   const activeContracts = contracts.filter(c => c.status === 'تایید شده' || c.status === 'در انتظار تایید');
   const totalCommission = contracts.filter(c => c.status === 'تایید شده').reduce((sum, c) => sum + c.commission, 0);
@@ -17,9 +17,9 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
   const stats = [
     { label: 'قرارداد فعال', value: activeContracts.length.toString(), icon: 'fa-file-contract', color: 'blue', page: 'contracts' as ActivePage },
+    { label: 'قولنامه‌ها', value: agreements.length.toString(), icon: 'fa-file-signature', color: 'indigo', page: 'agreement' as ActivePage },
     { label: 'مشتریان فعال', value: activeClients.length.toString(), icon: 'fa-user-plus', color: 'green', page: 'crm' as ActivePage },
     { label: 'کمیسیون ماهانه', value: formatPrice(totalCommission), icon: 'fa-coins', color: 'amber', page: 'commissions' as ActivePage },
-    { label: 'ملک‌های ثبت‌شده', value: properties.length.toString(), icon: 'fa-building', color: 'purple', page: 'properties' as ActivePage },
   ];
 
   return (
@@ -33,6 +33,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                 stat.color === 'blue' ? 'bg-blue-50 text-blue-600' :
                 stat.color === 'green' ? 'bg-green-50 text-green-600' :
                 stat.color === 'amber' ? 'bg-amber-50 text-amber-600' :
+                stat.color === 'indigo' ? 'bg-indigo-50 text-indigo-600' :
                 'bg-purple-50 text-purple-600'
               }`}>
                 <i className={`fa-solid ${stat.icon}`}></i>
@@ -115,6 +116,38 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
           </div>
         </div>
       </div>
+
+      {/* Recent Agreements */}
+      {agreements.length > 0 && (
+        <div className="card">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold text-gray-900 flex items-center gap-2">
+              <i className="fa-solid fa-file-signature text-indigo-600"></i>
+              آخرین قولنامه‌ها
+            </h3>
+            <button onClick={() => onNavigate('agreement')} className="text-sm text-blue-600 hover:text-blue-700 font-medium">مشاهده همه</button>
+          </div>
+          <div className="space-y-3">
+            {agreements.slice(-3).reverse().map((agr) => (
+              <div key={agr.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center">
+                    <i className="fa-solid fa-file-signature text-indigo-600 text-sm"></i>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">{agr.agreementNumber}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{agr.seller.name} ← {agr.buyer.name}</p>
+                  </div>
+                </div>
+                <div className="text-left">
+                  <p className="text-sm font-medium text-gray-800">{formatPrice(agr.totalPrice)}</p>
+                  <span className={`badge ${getStatusBg(getStatusColor(agr.status))}`}>{agr.status}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Second Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

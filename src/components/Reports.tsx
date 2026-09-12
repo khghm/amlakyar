@@ -2,7 +2,7 @@ import { useData } from '../store/DataContext';
 import { formatPrice, formatNumber } from '../utils/helpers';
 
 export default function Reports() {
-  const { properties, contracts, clients, events, agents } = useData();
+  const { properties, contracts, clients, events, agents, agreements } = useData();
 
   const totalRevenue = contracts.filter(c => c.status === 'تایید شده').reduce((sum, c) => sum + c.commission, 0);
   const pendingRevenue = contracts.filter(c => c.status === 'در انتظار تایید' || c.status === 'پیش‌نویس').reduce((sum, c) => sum + c.commission, 0);
@@ -251,6 +251,36 @@ export default function Reports() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Agreements Stats */}
+      <div className="card">
+        <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <i className="fa-solid fa-file-signature text-indigo-600"></i>
+          آمار قولنامه‌ها
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <div className="text-center p-4 bg-blue-50 rounded-xl">
+            <p className="text-2xl font-bold text-blue-700">{agreements.length}</p>
+            <p className="text-xs text-blue-600 mt-1">کل قولنامه‌ها</p>
+          </div>
+          <div className="text-center p-4 bg-amber-50 rounded-xl">
+            <p className="text-2xl font-bold text-amber-700">{agreements.filter(a => a.status === 'در حال اجرا').length}</p>
+            <p className="text-xs text-amber-600 mt-1">در حال اجرا</p>
+          </div>
+          <div className="text-center p-4 bg-green-50 rounded-xl">
+            <p className="text-2xl font-bold text-green-700">{agreements.filter(a => a.status === 'تکمیل شده').length}</p>
+            <p className="text-xs text-green-600 mt-1">تکمیل شده</p>
+          </div>
+          <div className="text-center p-4 bg-purple-50 rounded-xl">
+            <p className="text-2xl font-bold text-purple-700">{formatPrice(agreements.reduce((s, a) => s + a.commissionAmount, 0))}</p>
+            <p className="text-xs text-purple-600 mt-1">کمیسیون قولنامه‌ها</p>
+          </div>
+          <div className="text-center p-4 bg-red-50 rounded-xl">
+            <p className="text-2xl font-bold text-red-700">{formatPrice(agreements.reduce((s, a) => s + a.totalPrice, 0))}</p>
+            <p className="text-xs text-red-600 mt-1">حجم معاملات</p>
           </div>
         </div>
       </div>
