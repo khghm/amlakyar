@@ -112,6 +112,88 @@ export interface Agent {
   active: boolean;
 }
 
+// ============ Agreement (قولنامه) Types ============
+export interface AgreementParty {
+  name: string;
+  nationalId: string;
+  fatherName: string;
+  birthCertificate: string;
+  phone: string;
+  address: string;
+  postalCode: string;
+  role: 'فروشنده' | 'خریدار' | 'موجر' | 'مستاجر';
+}
+
+export interface AgreementProperty {
+  type: 'آپارتمان' | 'ویلا' | 'مغازه' | 'زمین' | 'دفتر' | 'انبار' | 'باغ';
+  registrationPlaque: string; // پلاک ثبتی
+  registrationSection: string; // بخش ثبتی
+  area: number;
+  address: string;
+  floor?: number;
+  unit?: string;
+  hasParking: boolean;
+  hasElevator: boolean;
+  hasStorage: boolean;
+  legalStatus: 'آزاد' | 'در رهن' | 'در بازداشت' | 'موقوفه' | 'وصیتی';
+  mortgageDetails?: string;
+  usage: 'مسکونی' | 'تجاری' | 'اداری' | 'صنعتی' | 'کشاورزی';
+  amenities: string[];
+}
+
+export interface PaymentInstallment {
+  id: string;
+  amount: number;
+  dueDate: string;
+  description: string;
+  paid: boolean;
+  paidDate?: string;
+}
+
+export interface Agreement {
+  id: string;
+  agreementNumber: string;
+  trackingCode: string;
+  type: 'فروش' | 'اجاره' | 'رهن' | 'مشارکت' | 'صلح';
+  date: string;
+  // طرفین
+  seller: AgreementParty;
+  buyer: AgreementParty;
+  // ملک
+  property: AgreementProperty;
+  // مبلغ
+  totalPrice: number;
+  deposit: number;
+  installments: PaymentInstallment[];
+  // شرایط
+  deliveryDate: string;
+  transferDate: string;
+  notaryOffice: string;
+  penaltyPerDay: number; // وجه التزام روزانه
+  commissionAmount: number;
+  commissionRate: number;
+  // حقوقی
+  hasRightOfRescission: boolean;
+  rescissionDeadline: string;
+  rescissionPenalty: number;
+  forceMajeure: boolean;
+  specialConditions: string;
+  // امضا
+  sellerSignature: boolean;
+  buyerSignature: boolean;
+  witness1Name: string;
+  witness1NationalId: string;
+  witness1Signature: boolean;
+  witness2Name: string;
+  witness2NationalId: string;
+  witness2Signature: boolean;
+  agentSignature: boolean;
+  // وضعیت
+  status: 'پیش‌نویس' | 'امضا شده' | 'در حال اجرا' | 'تکمیل شده' | 'فسخ شده';
+  notes: string;
+  createdAt: string;
+}
+
 // ============ Initial Data ============
 const initialProperties: Property[] = [
   { id: 'P-001', title: 'آپارتمان ۱۲۰ متری سعادت‌آباد', type: 'آپارتمان', dealType: 'فروش', area: 120, rooms: 3, price: 8500000000, address: 'سعادت‌آباد، بلوار دریا، خیابان ۱۵', district: 'منطقه ۲', floor: 5, hasParking: true, hasElevator: true, hasStorage: true, description: 'آپارتمان نوساز با ویو عالی', images: [], status: 'فعال', ownerId: 'O-001', ownerName: 'حسن موسوی', ownerPhone: '۰۹۱۲۱۱۱۲۲۲۳', createdAt: '۱۴۰۲/۰۸/۲۰' },
@@ -159,6 +241,49 @@ const initialAgents: Agent[] = [
   { id: 'A-003', name: 'علی موسوی', phone: '۰۹۱۲۵۵۵۴۴۴۳', role: 'مشاور', deals: 3, totalCommission: 12500000, rating: 4.2, active: true },
 ];
 
+const initialAgreements: Agreement[] = [
+  {
+    id: 'AGR-001',
+    agreementNumber: 'MB-1402-001',
+    trackingCode: 'IR-987654321',
+    type: 'فروش',
+    date: '۱۴۰۲/۰۹/۱۰',
+    seller: { name: 'حسن موسوی', nationalId: '۰۰۷۸۹۴۵۶۱۲', fatherName: 'علی', birthCertificate: '۱۲۳۴', phone: '۰۹۱۲۱۱۱۲۲۲۳', address: 'تهران، سعادت‌آباد، بلوار دریا', postalCode: '۱۴۶۸۷۶۵۴۳۲', role: 'فروشنده' },
+    buyer: { name: 'علی رضایی', nationalId: '۰۰۱۲۳۴۵۶۷۸', fatherName: 'محمد', birthCertificate: '۵۶۷۸', phone: '۰۹۱۲۳۴۵۶۷۸۹', address: 'تهران، ونک، خیابان گاندی', postalCode: '۱۵۱۶۷۸۹۴۵۶', role: 'خریدار' },
+    property: { type: 'آپارتمان', registrationPlaque: '۱۲۳۴/۵۶', registrationSection: '۷', area: 120, address: 'تهران، سعادت‌آباد، بلوار دریا، پلاک ۱۵، واحد ۵', floor: 5, unit: '۵', hasParking: true, hasElevator: true, hasStorage: true, legalStatus: 'آزاد', usage: 'مسکونی', amenities: ['پارکینگ', 'آسانسور', 'انباری', 'بالکن'] },
+    totalPrice: 8500000000,
+    deposit: 2000000000,
+    installments: [
+      { id: 'INS-1', amount: 2000000000, dueDate: '۱۴۰۲/۰۹/۱۰', description: 'پیش‌پرداخت', paid: true, paidDate: '۱۴۰۲/۰۹/۱۰' },
+      { id: 'INS-2', amount: 3000000000, dueDate: '۱۴۰۲/۱۰/۱۵', description: 'قسط دوم', paid: false },
+      { id: 'INS-3', amount: 3500000000, dueDate: '۱۴۰۲/۱۱/۲۰', description: 'هنگام تنظیم سند', paid: false },
+    ],
+    deliveryDate: '۱۴۰۲/۱۱/۲۵',
+    transferDate: '۱۴۰۲/۱۱/۲۰',
+    notaryOffice: 'دفترخانه شماره ۱۲۳ تهران',
+    penaltyPerDay: 50000000,
+    commissionAmount: 42500000,
+    commissionRate: 0.5,
+    hasRightOfRescission: true,
+    rescissionDeadline: '۱۴۰۲/۰۹/۲۰',
+    rescissionPenalty: 500000000,
+    forceMajeure: true,
+    specialConditions: 'فروشنده متعهد می‌شود ملک را بدون هیچگونه بدهی و مانع قانونی تحویل دهد.',
+    sellerSignature: true,
+    buyerSignature: true,
+    witness1Name: 'رضا کریمی',
+    witness1NationalId: '۰۰۳۴۵۶۷۸۹۰',
+    witness1Signature: true,
+    witness2Name: 'مریم حسینی',
+    witness2NationalId: '۰۰۲۳۴۵۶۷۸۹',
+    witness2Signature: true,
+    agentSignature: true,
+    status: 'در حال اجرا',
+    notes: '',
+    createdAt: '۱۴۰۲/۰۹/۱۰',
+  },
+];
+
 // ============ Context ============
 interface DataContextType {
   properties: Property[];
@@ -167,6 +292,7 @@ interface DataContextType {
   events: CalendarEvent[];
   notifications: Notification[];
   agents: Agent[];
+  agreements: Agreement[];
   addProperty: (p: Omit<Property, 'id' | 'createdAt'>) => void;
   updateProperty: (id: string, p: Partial<Property>) => void;
   deleteProperty: (id: string) => void;
@@ -183,6 +309,9 @@ interface DataContextType {
   markNotificationRead: (id: string) => void;
   markAllNotificationsRead: () => void;
   deleteNotification: (id: string) => void;
+  addAgreement: (a: Omit<Agreement, 'id' | 'createdAt'>) => void;
+  updateAgreement: (id: string, a: Partial<Agreement>) => void;
+  deleteAgreement: (id: string) => void;
   generateId: (prefix: string) => string;
 }
 
@@ -203,6 +332,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [events, setEvents] = useState<CalendarEvent[]>(() => loadFromStorage('emlakyar_events', initialEvents));
   const [notifications, setNotifications] = useState<Notification[]>(() => loadFromStorage('emlakyar_notifications', initialNotifications));
   const [agents] = useState<Agent[]>(() => loadFromStorage('emlakyar_agents', initialAgents));
+  const [agreements, setAgreements] = useState<Agreement[]>(() => loadFromStorage('emlakyar_agreements', initialAgreements));
 
   // Persist to localStorage
   useEffect(() => { localStorage.setItem('emlakyar_properties', JSON.stringify(properties)); }, [properties]);
@@ -210,6 +340,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   useEffect(() => { localStorage.setItem('emlakyar_clients', JSON.stringify(clients)); }, [clients]);
   useEffect(() => { localStorage.setItem('emlakyar_events', JSON.stringify(events)); }, [events]);
   useEffect(() => { localStorage.setItem('emlakyar_notifications', JSON.stringify(notifications)); }, [notifications]);
+  useEffect(() => { localStorage.setItem('emlakyar_agreements', JSON.stringify(agreements)); }, [agreements]);
 
   const generateId = (prefix: string) => `${prefix}-${Date.now().toString(36).toUpperCase()}`;
 
@@ -252,14 +383,23 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const markAllNotificationsRead = () => setNotifications(prev => prev.map(x => ({ ...x, read: true })));
   const deleteNotification = (id: string) => setNotifications(prev => prev.filter(x => x.id !== id));
 
+  const addAgreement = (a: Omit<Agreement, 'id' | 'createdAt'>) => {
+    const newAgreement = { ...a, id: generateId('AGR'), createdAt: new Date().toLocaleDateString('fa-IR') };
+    setAgreements(prev => [...prev, newAgreement]);
+    addNotification({ title: 'قولنامه جدید ثبت شد', text: `قولنامه ${newAgreement.agreementNumber} با کد رهگیری ${newAgreement.trackingCode} ثبت شد`, type: 'success' });
+  };
+  const updateAgreement = (id: string, a: Partial<Agreement>) => setAgreements(prev => prev.map(x => x.id === id ? { ...x, ...a } : x));
+  const deleteAgreement = (id: string) => setAgreements(prev => prev.filter(x => x.id !== id));
+
   return (
     <DataContext.Provider value={{
-      properties, contracts, clients, events, notifications, agents,
+      properties, contracts, clients, events, notifications, agents, agreements,
       addProperty, updateProperty, deleteProperty,
       addContract, updateContract, deleteContract,
       addClient, updateClient, deleteClient, addClientActivity,
       addEvent, updateEvent, deleteEvent,
       markNotificationRead, markAllNotificationsRead, deleteNotification,
+      addAgreement, updateAgreement, deleteAgreement,
       generateId,
     }}>
       {children}

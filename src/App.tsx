@@ -9,8 +9,9 @@ import Properties from './components/Properties';
 import Calendar from './components/Calendar';
 import Reports from './components/Reports';
 import Header from './components/Header';
+import AgreementPage from './components/Agreement';
 
-export type ActivePage = 'dashboard' | 'properties' | 'contracts' | 'crm' | 'commissions' | 'calendar' | 'reports';
+export type ActivePage = 'dashboard' | 'properties' | 'agreement' | 'contracts' | 'crm' | 'commissions' | 'calendar' | 'reports';
 
 function AppContent() {
   const [activePage, setActivePage] = useState<ActivePage>('dashboard');
@@ -22,6 +23,8 @@ function AppContent() {
         return <Dashboard onNavigate={setActivePage} />;
       case 'properties':
         return <Properties />;
+      case 'agreement':
+        return <AgreementPage />;
       case 'contracts':
         return <Contracts />;
       case 'crm':

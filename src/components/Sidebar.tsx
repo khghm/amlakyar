@@ -8,6 +8,7 @@ interface SidebarProps {
 const menuItems = [
   { id: 'dashboard' as ActivePage, label: 'داشبورد', icon: 'fa-chart-line', section: 'main' },
   { id: 'properties' as ActivePage, label: 'املاک', icon: 'fa-building', section: 'main' },
+  { id: 'agreement' as ActivePage, label: 'قولنامه', icon: 'fa-file-signature', section: 'main' },
   { id: 'contracts' as ActivePage, label: 'قراردادها', icon: 'fa-file-contract', section: 'main' },
   { id: 'crm' as ActivePage, label: 'مشتریان (CRM)', icon: 'fa-users', section: 'main' },
   { id: 'commissions' as ActivePage, label: 'کمیسیون‌ها', icon: 'fa-calculator', section: 'main' },
