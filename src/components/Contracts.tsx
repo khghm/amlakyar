@@ -114,6 +114,7 @@ export default function Contracts() {
                 <th className="text-right px-5 py-3 text-xs font-medium text-gray-500">مبلغ</th>
                 <th className="text-right px-5 py-3 text-xs font-medium text-gray-500">کمیسیون</th>
                 <th className="text-right px-5 py-3 text-xs font-medium text-gray-500">وضعیت</th>
+                <th className="text-right px-5 py-3 text-xs font-medium text-gray-500">قولنامه</th>
                 <th className="text-right px-5 py-3 text-xs font-medium text-gray-500">سامانه دولتی</th>
                 <th className="text-right px-5 py-3 text-xs font-medium text-gray-500">عملیات</th>
               </tr>
@@ -121,7 +122,7 @@ export default function Contracts() {
             <tbody>
               {filteredContracts.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="text-center py-10 text-gray-400 text-sm">قراردادی یافت نشد</td>
+                  <td colSpan={10} className="text-center py-10 text-gray-400 text-sm">قراردادی یافت نشد</td>
                 </tr>
               ) : filteredContracts.map((contract) => (
                 <tr key={contract.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
@@ -154,9 +155,27 @@ export default function Contracts() {
                     <span className="text-sm font-medium text-green-700">{formatPrice(contract.commission)}</span>
                   </td>
                   <td className="px-5 py-4">
-                    <span className={`badge ${getStatusBg(getStatusColor(contract.status))}`}>
-                      {contract.status}
-                    </span>
+                    <select
+                      value={contract.status}
+                      onChange={(e) => updateContract(contract.id, { status: e.target.value as Contract['status'] })}
+                      className={`text-xs font-medium rounded-lg px-2 py-1 border-0 cursor-pointer ${getStatusBg(getStatusColor(contract.status))}`}
+                    >
+                      <option value="پیش‌نویس">پیش‌نویس</option>
+                      <option value="در انتظار تایید">در انتظار تایید</option>
+                      <option value="تایید شده">تایید شده</option>
+                      <option value="رد شده">رد شده</option>
+                      <option value="لغو شده">لغو شده</option>
+                    </select>
+                  </td>
+                  <td className="px-5 py-4">
+                    {contract.agreementId ? (
+                      <div className="flex items-center gap-1">
+                        <i className="fa-solid fa-link text-indigo-500 text-xs"></i>
+                        <span className="text-xs text-indigo-700 font-mono">متصل</span>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-gray-400">—</span>
+                    )}
                   </td>
                   <td className="px-5 py-4">
                     {contract.trackingCode ? (

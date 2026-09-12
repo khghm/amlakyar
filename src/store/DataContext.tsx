@@ -45,6 +45,7 @@ export interface Contract {
   status: 'پیش‌نویس' | 'در انتظار تایید' | 'تایید شده' | 'رد شده' | 'لغو شده';
   trackingCode?: string;
   govStatus?: 'ارسال نشده' | 'در حال بررسی' | 'تایید شده' | 'رد شده';
+  agreementId?: string; // ارتباط با قولنامه
   notes: string;
   createdAt: string;
 }
@@ -356,7 +357,31 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setContracts(prev => [...prev, newContract]);
     addNotification({ title: 'قرارداد جدید ثبت شد', text: `قرارداد ${newContract.id} ثبت و به سامانه دولتی ارسال شد`, type: 'success' });
   };
-  const updateContract = (id: string, c: Partial<Contract>) => setContracts(prev => prev.map(x => x.id === id ? { ...x, ...c } : x));
+  const updateContract = (id: string, c: Partial<Contract>) => {
+    setContracts(prev => prev.map(x => x.id === id ? { ...x, ...c } : x));
+    
+    // Sync agreement status if contract has related agreement
+    if (c.status) {
+      const contract = contracts.find(ct => ct.id === id);
+      if (contract?.agreementId) {
+        // Map contract status to agreement status
+        let agreementStatus: Agreement['status'] = 'پیش‌نویس';
+        switch (c.status) {
+          case 'پیش‌نویس': agreementStatus = 'پیش‌نویس'; break;
+          case 'در انتظار تایید': agreementStatus = 'امضا شده'; break;
+          case 'تایید شده': agreementStatus = 'در حال اجرا'; break;
+          case 'رد شده': agreementStatus = 'فسخ شده'; break;
+          case 'لغو شده': agreementStatus = 'فسخ شده'; break;
+        }
+        setAgreements(prev => prev.map(a => a.id === contract.agreementId ? { ...a, status: agreementStatus } : a));
+        addNotification({ 
+          title: 'هماهنگی قولنامه و قرارداد', 
+          text: `وضعیت قولنامه مرتبط با قرارداد ${id} به "${agreementStatus}" تغییر کرد`, 
+          type: 'info' 
+        });
+      }
+    }
+  };
   const deleteContract = (id: string) => setContracts(prev => prev.filter(x => x.id !== id));
 
   const addClient = (c: Omit<Client, 'id' | 'createdAt' | 'activities'>) => {
@@ -384,7 +409,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const deleteNotification = (id: string) => setNotifications(prev => prev.filter(x => x.id !== id));
 
   const addAgreement = (a: Omit<Agreement, 'id' | 'createdAt'>) => {
-    const newAgreement = { ...a, id: generateId('AGR'), createdAt: new Date().toLocaleDateString('fa-IR') };
+    const agreementId = generateId('AGR');
+    const newAgreement = { ...a, id: agreementId, createdAt: new Date().toLocaleDateString('fa-IR') };
     setAgreements(prev => [...prev, newAgreement]);
     
     // Create related contract automatically
@@ -408,6 +434,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       status: 'پیش‌نویس',
       trackingCode: a.trackingCode,
       govStatus: 'ارسال نشده',
+      agreementId: agreementId, // ارتباط با قولنامه
       notes: `ایجاد شده از قولنامه ${a.agreementNumber}`,
     };
     const contractId = `C-1402-${String(contracts.length + 90).padStart(3, '0')}`;
@@ -464,7 +491,31 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
     addNotification({ title: 'قولنامه جدید ثبت شد', text: `قولنامه ${newAgreement.agreementNumber} با کد رهگیری ${newAgreement.trackingCode} ثبت شد. قرارداد و رویدادهای مرتبط ایجاد شدند.`, type: 'success' });
   };
-  const updateAgreement = (id: string, a: Partial<Agreement>) => setAgreements(prev => prev.map(x => x.id === id ? { ...x, ...a } : x));
+  const updateAgreement = (id: string, a: Partial<Agreement>) => {
+    setAgreements(prev => prev.map(x => x.id === id ? { ...x, ...a } : x));
+    
+    // Sync contract status if agreement has related contract
+    if (a.status) {
+      const contract = contracts.find(ct => ct.agreementId === id);
+      if (contract) {
+        // Map agreement status to contract status
+        let contractStatus: Contract['status'] = 'پیش‌نویس';
+        switch (a.status) {
+          case 'پیش‌نویس': contractStatus = 'پیش‌نویس'; break;
+          case 'امضا شده': contractStatus = 'در انتظار تایید'; break;
+          case 'در حال اجرا': contractStatus = 'تایید شده'; break;
+          case 'تکمیل شده': contractStatus = 'تایید شده'; break;
+          case 'فسخ شده': contractStatus = 'لغو شده'; break;
+        }
+        setContracts(prev => prev.map(ct => ct.id === contract.id ? { ...ct, status: contractStatus } : ct));
+        addNotification({ 
+          title: 'هماهنگی قرارداد و قولنامه', 
+          text: `وضعیت قرارداد ${contract.id} مرتبط با قولنامه به "${contractStatus}" تغییر کرد`, 
+          type: 'info' 
+        });
+      }
+    }
+  };
   const deleteAgreement = (id: string) => setAgreements(prev => prev.filter(x => x.id !== id));
 
   return (

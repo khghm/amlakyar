@@ -8,7 +8,7 @@ import CurrencyInput from './CurrencyInput';
 type WizardStep = 'type' | 'parties' | 'property' | 'financial' | 'conditions' | 'signatures' | 'preview';
 
 export default function AgreementPage() {
-  const { agreements, addAgreement, deleteAgreement } = useData();
+  const { agreements, addAgreement, updateAgreement, deleteAgreement } = useData();
   const [showWizard, setShowWizard] = useState(false);
   const [viewingAgreement, setViewingAgreement] = useState<Agreement | null>(null);
   const [printingAgreement, setPrintingAgreement] = useState<Agreement | null>(null);
@@ -87,12 +87,13 @@ export default function AgreementPage() {
                 <th className="text-right px-5 py-3 text-xs font-medium text-gray-500">مبلغ</th>
                 <th className="text-right px-5 py-3 text-xs font-medium text-gray-500">کد رهگیری</th>
                 <th className="text-right px-5 py-3 text-xs font-medium text-gray-500">وضعیت</th>
+                <th className="text-right px-5 py-3 text-xs font-medium text-gray-500">قرارداد</th>
                 <th className="text-right px-5 py-3 text-xs font-medium text-gray-500">عملیات</th>
               </tr>
             </thead>
             <tbody>
               {agreements.length === 0 ? (
-                <tr><td colSpan={8} className="text-center py-10 text-gray-400 text-sm">قولنامه‌ای ثبت نشده است</td></tr>
+                <tr><td colSpan={9} className="text-center py-10 text-gray-400 text-sm">قولنامه‌ای ثبت نشده است</td></tr>
               ) : agreements.map((agr) => (
                 <tr key={agr.id} className="border-b border-gray-50 hover:bg-gray-50/50">
                   <td className="px-5 py-4 text-sm font-mono font-medium text-gray-800">{agr.agreementNumber}</td>
@@ -109,7 +110,25 @@ export default function AgreementPage() {
                   </td>
                   <td className="px-5 py-4 text-sm font-medium text-gray-800">{formatPrice(agr.totalPrice)}</td>
                   <td className="px-5 py-4"><span className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-lg font-mono">{agr.trackingCode}</span></td>
-                  <td className="px-5 py-4"><span className={`badge ${getStatusBg(getStatusColor(agr.status))}`}>{agr.status}</span></td>
+                  <td className="px-5 py-4">
+                    <select
+                      value={agr.status}
+                      onChange={(e) => updateAgreement(agr.id, { status: e.target.value as Agreement['status'] })}
+                      className={`text-xs font-medium rounded-lg px-2 py-1 border-0 cursor-pointer ${getStatusBg(getStatusColor(agr.status))}`}
+                    >
+                      <option value="پیش‌نویس">پیش‌نویس</option>
+                      <option value="امضا شده">امضا شده</option>
+                      <option value="در حال اجرا">در حال اجرا</option>
+                      <option value="تکمیل شده">تکمیل شده</option>
+                      <option value="فسخ شده">فسخ شده</option>
+                    </select>
+                  </td>
+                  <td className="px-5 py-4">
+                    <div className="flex items-center gap-1">
+                      <i className="fa-solid fa-link text-indigo-500 text-xs"></i>
+                      <span className="text-xs text-indigo-700 font-mono">متصل</span>
+                    </div>
+                  </td>
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-1">
                       <button onClick={() => setViewingAgreement(agr)} className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center hover:bg-blue-50 text-gray-500 hover:text-blue-600" title="مشاهده">
